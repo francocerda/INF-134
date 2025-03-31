@@ -21,6 +21,11 @@ int main() {
     cout << "Bandera: " << bandera << endl;
     cout << endl;
 
+    int n,m;
+    if(n>m){
+        n +=1;
+    }
+
     // 2. Arreglos en C++
     int arreglo[5] = {1, 2, 3, 4, 5}; // Declaración de un arreglo de 5 enteros
 
