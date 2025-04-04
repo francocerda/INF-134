@@ -50,7 +50,7 @@ int main() {
     }
 
     // Lectura
-    ifstream archivoEntrada("datos.txt");
+    ifstream archivoEntrada("malibu.txt");
     string linea;
     if (archivoEntrada.is_open()) {
         while (getline(archivoEntrada, linea)) {
