@@ -6,7 +6,6 @@ const int MAX_SIZE = 100;
 int arr[MAX_SIZE];
 int ListSize = 0;
 
-
 void arr_insertAtEnd(int value) {
     if (ListSize < MAX_SIZE) {
         arr[ListSize] = value;
@@ -40,90 +39,65 @@ void arr_display() {
     cout << endl;
 }
 
-//!Enlazada
+//! Enlazada
 
 struct Node {
     int data;
-    int next;
+    Node* next;  // Cambiado de int a puntero Node*
 };
 
-const int MAX_NODES = 100;
-Node list[MAX_NODES];
-int head = -1;
-int freeHead = 0;
-
-void initializeFreeList() {
-    for (int i = 0; i < MAX_NODES - 1; i++) {
-        list[i].next = i + 1;
-    }
-    list[MAX_NODES - 1].next = -1;
-}
-
-int getFreeNode() {
-    if (freeHead == -1) {
-        cout << "No hay más nodos libres" << endl;
-        return -1;
-    }
-    int nodeIndex = freeHead;
-    freeHead = list[freeHead].next;
-    return nodeIndex;
-}
-
-void freeNode(int index) {
-    list[index].next = freeHead;
-    freeHead = index;
-}
+Node* head = nullptr;  // Puntero al primer nodo, inicializado como nullptr
 
 void ll_insertAtBeginning(int value) {
-    int newNode = getFreeNode();
-    if (newNode == -1) return;
-    list[newNode].data = value;
-    list[newNode].next = head;
-    head = newNode;
+    
+    Node* newNode = new Node();  // Crear un nuevo nodo dinámicamente
+    newNode->data = value;
+    newNode->next = head;  // El nuevo nodo apunta al antiguo head
+    head = newNode;  // El nuevo nodo se convierte en el head
 }
 
 void ll_insertAtEnd(int value) {
-    int newNode = getFreeNode();
-    if (newNode == -1) return;
-    list[newNode].data = value;
-    list[newNode].next = -1;
-    if (head == -1) {
+
+    Node* newNode = new Node();  // Crear un nuevo nodo dinámicamente
+    newNode->data = value;
+    newNode->next = nullptr;  // El nuevo nodo será el último
+    if (head == nullptr) {  // Si la lista está vacía
         head = newNode;
     } else {
-        int current = head;
-        while (list[current].next != -1) {
-            current = list[current].next;
+        Node* current = head;
+        while (current->next != nullptr) {  // Buscar el último nodo
+            current = current->next;
         }
-        list[current].next = newNode;
+        current->next = newNode;  // Conectar el nuevo nodo al final
     }
 }
 
 void ll_deleteFromBeginning() {
-    if (head == -1) {
+    if (head == nullptr) {  // Verificar si la lista está vacía
         cout << "Lista vacía" << endl;
         return;
     }
-    int temp = head;
-    head = list[head].next;
-    freeNode(temp);
+    Node* temp = head;  // Guardar el nodo a eliminar
+    head = head->next;  // Mover head al siguiente nodo
+    delete temp;  // Liberar la memoria del nodo eliminado
 }
 
 bool ll_search(int value) {
-    int current = head;
-    while (current != -1) {
-        if (list[current].data == value) {
+    Node* current = head;
+    while (current != nullptr) {
+        if (current->data == value) {
             return true;
         }
-        current = list[current].next;
+        current = current->next;
     }
     return false;
 }
 
 void ll_display() {
-    int current = head;
-    while (current != -1) {
-        cout << list[current].data << " ";
-        current = list[current].next;
+    Node* current = head;
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
     }
     cout << endl;
 }
@@ -143,8 +117,7 @@ int main() {
 
     ListSize = 0;
 
-    cout << "\nEjemplo de lista enlazada basada en arreglos:" << endl;
-    initializeFreeList();
+    cout << "\nEjemplo de lista enlazada:" << endl;
     ll_insertAtBeginning(1);
     ll_insertAtBeginning(2);
     ll_insertAtBeginning(3);

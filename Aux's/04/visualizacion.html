@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualización de Listas Enlazadas en C++</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .code-block {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            overflow-x: auto;
+            white-space: pre;
+            border-radius: 4px;
+        }
+        
+        .visualization {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            min-height: 200px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 60px;
+        }
+        
+        .node {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            transition: all 0.5s ease;
+        }
+        
+        .node-box {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            position: relative;
+        }
+        
+        .node-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .node-next {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .arrow {
+            width: 30px;
+            height: 2px;
+            background-color: #3498db;
+            position: relative;
+            margin: 0 -5px;
+            display: inline-block;
+        }
+        
+        .arrow::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #3498db;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        
+        .highlight {
+            border-color: #e74c3c;
+            background-color: #fadbd8;
+            animation: pulse 1s infinite;
+        }
+        
+        .new-node {
+            border-color: #27ae60;
+            background-color: #eafaf1;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+        
+        .list-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 20px 10px;
+            min-height: 120px;
+        }
+        
+        .null-ptr {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #95a5a6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #95a5a6;
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f8e9;
+            border-left: 4px solid #8bc34a;
+            border-radius: 4px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        #codeImplementation {
+            font-family: monospace;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        
+        .head-pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .step-control {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .log-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 100px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            font-family: monospace;
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .log-message {
+            margin: 5px 0;
+            padding: 2px 5px;
+            border-left: 3px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visualización de Listas Enlazadas en C++</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="changeTab('visualization')">Visualización</div>
+            <div class="tab" onclick="changeTab('implementation')">Implementación en C++</div>
+            <div class="tab" onclick="changeTab('explanation')">Explicación</div>
+        </div>
+        
+        <div id="visualization" class="tab-content active">
+            <h2>Operaciones con Listas Enlazadas</h2>
+            <div class="controls">
+                <button onclick="insertAtBeginning()">Insertar al Inicio</button>
+                <button onclick="insertAtEnd()">Insertar al Final</button>
+                <button onclick="insertAt()">Insertar en Posición</button>
+                <input type="number" id="insertAtPosition" placeholder="Pos" min="0" value="1">
+                <button onclick="deleteAtBeginning()">Eliminar al Inicio</button>
+                <button onclick="deleteAtEnd()">Eliminar al Final</button>
+                <button onclick="deleteAt()">Eliminar en Posición</button>
+                <input type="number" id="deleteAtPosition" placeholder="Pos" min="0" value="1">
+                <button onclick="search()">Buscar Valor</button>
+                <input type="number" id="searchValue" placeholder="Valor" value="10">
+                <button onclick="resetList()">Reiniciar Lista</button>
+            </div>
+            
+            <div class="visualization">
+                <div class="list-container" id="listContainer"></div>
+                <div class="explanation" id="currentExplanation">
+                    Selecciona una operación para comenzar.
+                </div>
+                <div class="log-container" id="logContainer"></div>
+                <div class="speed-control">
+                    <label for="animationSpeed">Velocidad de animación:</label>
+                    <input type="range" id="animationSpeed" min="0.5" max="3" step="0.5" value="1">
+                    <span id="speedValue">1x</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="implementation" class="tab-content">
+            <h2>Implementación de Lista Enlazada en C++</h2>
+            <div class="code-block" id="codeImplementation">
+// Definición de la estructura del nodo
+struct Node {
+    int data;
+    Node* next;
+    
+    // Constructor
+    Node(int value) : data(value), next(nullptr) {}
+};
+
+// Clase Lista Enlazada
+class LinkedList {
+private:
+    Node* head;
+    
+public:
+    // Constructor
+    LinkedList() : head(nullptr) {}
+    
+    // Destructor
+    ~LinkedList() {
+        Node* current = head;
+        while (current != nullptr) {
+            Node* next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+    }
+    
+    // Insertar al inicio
+    void insertAtBeginning(int value) {
+        Node* newNode = new Node(value);
+        newNode->next = head;
+        head = newNode;
+    }
+    
+    // Insertar al final
+    void insertAtEnd(int value) {
+        Node* newNode = new Node(value);
+        
+        // Si la lista está vacía
+        if (head == nullptr) {
+            head = newNode;
+            return;
+        }
+        
+        // Encontrar el último nodo
+        Node* current = head;
+        while (current->next != nullptr) {
+            current = current->next;
+        }
+        
+        // Conectar el nuevo nodo
+        current->next = newNode;
+    }
+    
+    // Insertar en posición específica
+    void insertAt(int position, int value) {
+        // Si es posición 0, insertar al inicio
+        if (position == 0) {
+            insertAtBeginning(value);
+            return;
+        }
+        
+        // Crear nuevo nodo
+        Node* newNode = new Node(value);
+        
+        // Encontrar la posición
+        Node* current = head;
+        int currentPos = 0;
+        
+        while (current != nullptr && currentPos < position - 1) {
+            current = current->next;
+            currentPos++;
+        }
+        
+        // Si la posición es válida
+        if (current != nullptr) {
+            newNode->next = current->next;
+            current->next = newNode;
+        } else {
+            // Si la posición es inválida, insertar al final
+            insertAtEnd(value);
+        }
+    }
+    
+    // Eliminar al inicio
+    bool deleteAtBeginning() {
+        if (head == nullptr) {
+            return false;
+        }
+        
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        return true;
+    }
+    
+    // Eliminar al final
+    bool deleteAtEnd() {
+        if (head == nullptr) {
+            return false;
+        }
+        
+        // Si solo hay un nodo
+        if (head->next == nullptr) {
+            delete head;
+            head = nullptr;
+            return true;
+        }
+        
+        // Encontrar el penúltimo nodo
+        Node* current = head;
+        while (current->next->next != nullptr) {
+            current = current->next;
+        }
+        
+        // Eliminar el último nodo
+        delete current->next;
+        current->next = nullptr;
+        return true;
+    }
+    
+    // Eliminar en posición específica
+    bool deleteAt(int position) {
+        if (head == nullptr) {
+            return false;
+        }
+        
+        // Si es posición 0, eliminar al inicio
+        if (position == 0) {
+            return deleteAtBeginning();
+        }
+        
+        // Encontrar la posición
+        Node* current = head;
+        int currentPos = 0;
+        
+        while (current != nullptr && currentPos < position - 1) {
+            current = current->next;
+            currentPos++;
+        }
+        
+        // Si la posición es válida y no es el final
+        if (current != nullptr && current->next != nullptr) {
+            Node* temp = current->next;
+            current->next = temp->next;
+            delete temp;
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // Buscar un valor
+    int search(int value) {
+        Node* current = head;
+        int position = 0;
+        
+        while (current != nullptr) {
+            if (current->data == value) {
+                return position;
+            }
+            current = current->next;
+            position++;
+        }
+        
+        return -1; // No encontrado
+    }
+    
+    // Mostrar la lista
+    void display() {
+        Node* current = head;
+        
+        while (current != nullptr) {
+            std::cout << current->data << " -> ";
+            current = current->next;
+        }
+        
+        std::cout << "nullptr" << std::endl;
+    }
+};
+            </div>
+        </div>
+        
+        <div id="explanation" class="tab-content">
+            <h2>Explicación de las Listas Enlazadas</h2>
+            
+            <h3>¿Qué es una Lista Enlazada?</h3>
+            <p>Una lista enlazada es una estructura de datos lineal que consiste en nodos donde cada nodo contiene un valor (dato) y una referencia (puntero) al siguiente nodo en la secuencia. A diferencia de los arrays, los elementos no están almacenados en posiciones contiguas de memoria.</p>
+            
+            <h3>Componentes principales:</h3>
+            <ul>
+                <li><strong>Nodo:</strong> Estructura que contiene el dato y un puntero al siguiente nodo.</li>
+                <li><strong>Head (Cabeza):</strong> Puntero al primer nodo de la lista.</li>
+                <li><strong>nullptr:</strong> El puntero del último nodo apunta a nullptr, indicando el final de la lista.</li>
+            </ul>
+            
+            <h3>Ventajas de las Listas Enlazadas:</h3>
+            <ul>
+                <li>Tamaño dinámico (no necesita tamaño predefinido).</li>
+                <li>Inserción y eliminación eficientes (O(1) si conocemos la posición).</li>
+                <li>Memoria eficiente (solo se asigna lo necesario).</li>
+                <li>Fácil implementación de otras estructuras como pilas y colas.</li>
+            </ul>
+            
+            <h3>Desventajas:</h3>
+            <ul>
+                <li>Acceso aleatorio ineficiente (O(n) en el peor caso).</li>
+                <li>Requiere más memoria que arrays (por los punteros adicionales).</li>
+                <li>Recorrido secuencial únicamente (sin acceso directo).</li>
+                <li>Mayor complejidad en la implementación.</li>
+            </ul>
+            
+            <h3>Operaciones Principales:</h3>
+            <ul>
+                <li><strong>Inserción:</strong> Agregar un nuevo nodo (al inicio, final o en una posición específica).</li>
+                <li><strong>Eliminación:</strong> Quitar un nodo (del inicio, final o de una posición específica).</li>
+                <li><strong>Búsqueda:</strong> Encontrar un nodo con un valor específico.</li>
+                <li><strong>Recorrido:</strong> Visitar todos los nodos de la lista.</li>
+            </ul>
+            
+            <p>En esta visualización, puedes ver cómo funciona cada operación en tiempo real y entender mejor cómo se manipulan los punteros entre nodos.</p>
+        </div>
+    </div>
+
+    <script>
+        class Node {
+            constructor(value) {
+                this.value = value;
+                this.next = null;
+                this.id = 'node-' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+        
+        class LinkedList {
+            constructor() {
+                this.head = null;
+                this.size = 0;
+            }
+            
+            isEmpty() {
+                return this.head === null;
+            }
+            
+            getSize() {
+                return this.size;
+            }
+            
+            insertAtBeginning(value) {
+                const newNode = new Node(value);
+                newNode.next = this.head;
+                this.head = newNode;
+                this.size++;
+                return newNode;
+            }
+            
+            insertAtEnd(value) {
+                const newNode = new Node(value);
+                
+                if (this.isEmpty()) {
+                    this.head = newNode;
+                } else {
+                    let current = this.head;
+                    while (current.next !== null) {
+                        current = current.next;
+                    }
+                    current.next = newNode;
+                }
+                
+                this.size++;
+                return newNode;
+            }
+            
+            insertAt(position, value) {
+                if (position < 0 || position > this.size) {
+                    return null;
+                }
+                
+                if (position === 0) {
+                    return this.insertAtBeginning(value);
+                }
+                
+                if (position === this.size) {
+                    return this.insertAtEnd(value);
+                }
+                
+                const newNode = new Node(value);
+                let current = this.head;
+                let previous = null;
+                let index = 0;
+                
+                while (index < position) {
+                    previous = current;
+                    current = current.next;
+                    index++;
+                }
+                
+                newNode.next = current;
+                previous.next = newNode;
+                this.size++;
+                
+                return newNode;
+            }
+            
+            deleteAtBeginning() {
+                if (this.isEmpty()) {
+                    return null;
+                }
+                
+                const removedNode = this.head;
+                this.head = this.head.next;
+                this.size--;
+                
+                return removedNode;
+            }
+            
+            deleteAtEnd() {
+                if (this.isEmpty()) {
+                    return null;
+                }
+                
+                if (this.size === 1) {
+                    const removedNode = this.head;
+                    this.head = null;
+                    this.size--;
+                    return removedNode;
+                }
+                
+                let current = this.head;
+                let previous = null;
+                
+                while (current.next !== null) {
+                    previous = current;
+                    current = current.next;
+                }
+                
+                previous.next = null;
+                this.size--;
+                
+                return current;
+            }
+            
+            deleteAt(position) {
+                if (this.isEmpty() || position < 0 || position >= this.size) {
+                    return null;
+                }
+                
+                if (position === 0) {
+                    return this.deleteAtBeginning();
+                }
+                
+                if (position === this.size - 1) {
+                    return this.deleteAtEnd();
+                }
+                
+                let current = this.head;
+                let previous = null;
+                let index = 0;
+                
+                while (index < position) {
+                    previous = current;
+                    current = current.next;
+                    index++;
+                }
+                
+                previous.next = current.next;
+                this.size--;
+                
+                return current;
+            }
+            
+            search(value) {
+                if (this.isEmpty()) {
+                    return -1;
+                }
+                
+                let current = this.head;
+                let index = 0;
+                
+                while (current !== null) {
+                    if (current.value === value) {
+                        return index;
+                    }
+                    current = current.next;
+                    index++;
+                }
+                
+                return -1;
+            }
+            
+            getNodeAt(position) {
+                if (position < 0 || position >= this.size) {
+                    return null;
+                }
+                
+                let current = this.head;
+                let index = 0;
+                
+                while (index < position) {
+                    current = current.next;
+                    index++;
+                }
+                
+                return current;
+            }
+            
+            toArray() {
+                const result = [];
+                let current = this.head;
+                
+                while (current !== null) {
+                    result.push(current);
+                    current = current.next;
+                }
+                
+                return result;
+            }
+        }
+
+        // Inicializar la lista enlazada
+        const list = new LinkedList();
+        const listContainer = document.getElementById('listContainer');
+        const explanationElement = document.getElementById('currentExplanation');
+        const logContainer = document.getElementById('logContainer');
+        const animationSpeedSlider = document.getElementById('animationSpeed');
+        const speedValueDisplay = document.getElementById('speedValue');
+        
+        // Variables globales para animación
+        let animationSpeed = 1;
+        let isAnimating = false;
+        
+        // Configurar el cambio de velocidad de animación
+        animationSpeedSlider.addEventListener('input', function() {
+            animationSpeed = parseFloat(this.value);
+            speedValueDisplay.textContent = animationSpeed + 'x';
+        });
+        
+        // Función para renderizar la lista
+        function renderList() {
+            listContainer.innerHTML = '';
+            
+            if (list.isEmpty()) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.textContent = 'La lista está vacía';
+                listContainer.appendChild(emptyMessage);
+                return;
+            }
+            
+            const nodes = list.toArray();
+            
+            nodes.forEach((node, index) => {
+                const nodeElement = createNodeElement(node, index === 0);
+                listContainer.appendChild(nodeElement);
+                
+                if (index < nodes.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'arrow';
+                    listContainer.appendChild(arrow);
+                }
+            });
+            
+            // Añadir el nullptr al final
+            const nullPtr = document.createElement('div');
+            nullPtr.className = 'null-ptr';
+            nullPtr.textContent = 'nullptr';
+            listContainer.appendChild(nullPtr);
+        }
+        
+        // Crear elemento visual de un nodo
+        function createNodeElement(node, isHead = false) {
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.id = node.id;
+            
+            const nodeBox = document.createElement('div');
+            nodeBox.className = 'node-box';
+            
+            if (isHead) {
+                const headLabel = document.createElement('div');
+                headLabel.className = 'head-pointer';
+                headLabel.textContent = 'head';
+                nodeBox.appendChild(headLabel);
+            }
+            
+            const nodeValue = document.createElement('div');
+            nodeValue.className = 'node-value';
+            nodeValue.textContent = node.value;
+            
+            const nodeNext = document.createElement('div');
+            nodeNext.className = 'node-next';
+            nodeNext.textContent = 'next';
+            
+            nodeBox.appendChild(nodeValue);
+            nodeBox.appendChild(nodeNext);
+            nodeElement.appendChild(nodeBox);
+            
+            return nodeElement;
+        }
+        
+        // Añadir mensaje al log
+        function addLog(message) {
+            const logMessage = document.createElement('div');
+            logMessage.className = 'log-message';
+            logMessage.textContent = message;
+            logContainer.appendChild(logMessage);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Pausar la ejecución
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms / animationSpeed));
+        }
+        
+        // Resaltar un nodo
+        async function highlightNode(nodeId, className = 'highlight', duration = 1000) {
+            const nodeElement = document.getElementById(nodeId);
+            if (!nodeElement) return;
+            
+            const nodeBox = nodeElement.querySelector('.node-box');
+            nodeBox.classList.add(className);
+            
+            await sleep(duration);
+            
+            nodeBox.classList.remove(className);
+        }
+        
+        // Función para insertar al inicio con animación
+        async function insertAtBeginning() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const randomValue = Math.floor(Math.random() * 100);
+            explanationElement.textContent = `Insertando el valor ${randomValue} al inicio de la lista.`;
+            addLog(`Creando nuevo nodo con valor ${randomValue}`);
+            
+            // Crear nuevo nodo
+            const newNode = list.insertAtBeginning(randomValue);
+            renderList();
+            
+            // Animar
+            addLog(`Nuevo nodo se convierte en la cabeza (head) de la lista`);
+            await highlightNode(newNode.id, 'new-node', 1500);
+            
+            // Actualizar explicación
+            explanationElement.textContent = `Se ha insertado el nodo con valor ${randomValue} al inicio de la lista. El nuevo nodo ahora es 'head'.`;
+            isAnimating = false;
+        }
+        
+        // Función para insertar al final con animación
+        async function insertAtEnd() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const randomValue = Math.floor(Math.random() * 100);
+            explanationElement.textContent = `Insertando el valor ${randomValue} al final de la lista.`;
+            addLog(`Creando nuevo nodo con valor ${randomValue}`);
+            
+            // Si la lista está vacía
+            if (list.isEmpty()) {
+                addLog(`Lista vacía. El nuevo nodo se convierte en la cabeza (head) de la lista`);
+                const newNode = list.insertAtEnd(randomValue);
+                renderList();
+                await highlightNode(newNode.id, 'new-node', 1500);
+            } else {
+                addLog(`Recorriendo la lista para encontrar el último nodo`);
+                
+                // Recorrer y animar
+                const oldNodes = list.toArray();
+                for (let i = 0; i < oldNodes.length; i++) {
+                    renderList();
+                    await highlightNode(oldNodes[i].id, 'highlight', 800);
+                    addLog(`Visitando nodo con valor ${oldNodes[i].value}`);
+                }
+                
+                // Insertar al final
+                addLog(`Encontrado el último nodo. Conectando el nuevo nodo`);
+                const newNode = list.insertAtEnd(randomValue);
+                renderList();
+                await highlightNode(newNode.id, 'new-node', 1500);
+            }
+            
+            // Actualizar explicación
+            explanationElement.textContent = `Se ha insertado el nodo con valor ${randomValue} al final de la lista.`;
+            isAnimating = false;
+        }
+        
+        // Función para insertar en posición específica
+        async function insertAt() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const position = parseInt(document.getElementById('insertAtPosition').value);
+            const randomValue = Math.floor(Math.random() * 100);
+            
+            explanationElement.textContent = `Insertando el valor ${randomValue} en la posición ${position}.`;
+            addLog(`Creando nuevo nodo con valor ${randomValue} para insertarlo en posición ${position}`);
+            
+            // Verificar si la posición es válida
+            if (position < 0 || position > list.getSize()) {
+                addLog(`Posición ${position} inválida. Debe estar entre 0 y ${list.getSize()}`);
+                explanationElement.textContent = `Posición ${position} inválida. Debe estar entre 0 y ${list.getSize()}.`;
+                isAnimating = false;
+                return;
+            }
+            
+            // Si es al inicio o al final, usar funciones específicas
+            if (position === 0) {
+                addLog(`Inserción en posición 0, equivale a insertar al inicio`);
+                await insertAtBeginning();
+                isAnimating = false;
+                return;
+            }
+            
+            if (position === list.getSize()) {
+                addLog(`Inserción en última posición, equivale a insertar al final`);
+                await insertAtEnd();
+                isAnimating = false;
+                return;
+            }
+            
+            // Recorrer hasta la posición
+            addLog(`Recorriendo la lista hasta la posición ${position-1}`);
+            const oldNodes = list.toArray();
+            for (let i = 0; i < position; i++) {
+                renderList();
+                await highlightNode(oldNodes[i].id, 'highlight', 800);
+                addLog(`Visitando nodo en posición ${i}`);
+            }
+            
+            // Insertar en la posición
+            addLog(`Encontrada la posición. Insertando el nuevo nodo`);
+            const newNode = list.insertAt(position, randomValue);
+            renderList();
+            await highlightNode(newNode.id, 'new-node', 1500);
+            
+            // Actualizar explicación
+            explanationElement.textContent = `Se ha insertado el nodo con valor ${randomValue} en la posición ${position}.`;
+            isAnimating = false;
+        }
+        
+        // Función para eliminar al inicio
+        async function deleteAtBeginning() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            if (list.isEmpty()) {
+                explanationElement.textContent = `La lista está vacía. No hay nada que eliminar.`;
+                addLog(`Intentando eliminar de una lista vacía. Operación cancelada.`);
+                isAnimating = false;
+                return;
+            }
+            
+            const removedNode = list.head;
+            explanationElement.textContent = `Eliminando el nodo con valor ${removedNode.value} del inicio de la lista.`;
+            addLog(`Eliminando el nodo en la posición 0 (cabeza) con valor ${removedNode.value}`);
+            
+            // Animar eliminación
+            renderList();
+            await highlightNode(removedNode.id, 'highlight', 1000);
+            
+            // Eliminar el nodo
+            addLog(`Actualizando puntero de cabeza (head) al siguiente nodo`);
+            list.deleteAtBeginning();
+            renderList();
+            
+            // Actualizar explicación
+            explanationElement.textContent = `Se ha eliminado el nodo con valor ${removedNode.value} del inicio de la lista.`;
+            isAnimating = false;
+        }
+        
+        // Función para eliminar al final
+        async function deleteAtEnd() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            if (list.isEmpty()) {
+                explanationElement.textContent = `La lista está vacía. No hay nada que eliminar.`;
+                addLog(`Intentando eliminar de una lista vacía. Operación cancelada.`);
+                isAnimating = false;
+                return;
+            }
+            
+            // Si solo hay un nodo
+            if (list.getSize() === 1) {
+                const removedNode = list.head;
+                explanationElement.textContent = `Eliminando el único nodo con valor ${removedNode.value}.`;
+                addLog(`La lista tiene un solo nodo. Eliminando el nodo cabeza.`);
+                
+                renderList();
+                await highlightNode(removedNode.id, 'highlight', 1000);
+                
+                list.deleteAtEnd();
+                renderList();
+                
+                explanationElement.textContent = `Se ha eliminado el único nodo. La lista está vacía ahora.`;
+                isAnimating = false;
+                return;
+            }
+            
+            const nodes = list.toArray();
+            const removedNode = nodes[nodes.length - 1];
+            explanationElement.textContent = `Eliminando el nodo con valor ${removedNode.value} del final de la lista.`;
+            
+            // Recorrer para encontrar el penúltimo nodo
+            addLog(`Recorriendo la lista para encontrar el penúltimo nodo`);
+            for (let i = 0; i < nodes.length; i++) {
+                renderList();
+                await highlightNode(nodes[i].id, 'highlight', 600);
+                addLog(`Visitando nodo en posición ${i}`);
+            }
+            
+            // Resaltar el nodo a eliminar
+            addLog(`Eliminando el último nodo con valor ${removedNode.value}`);
+            await highlightNode(removedNode.id, 'highlight', 1000);
+            
+            // Eliminar el nodo
+            list.deleteAtEnd();
+            renderList();
+            
+            // Actualizar explicación
+            explanationElement.textContent = `Se ha eliminado el nodo con valor ${removedNode.value} del final de la lista.`;
+            isAnimating = false;
+        }
+        
+        // Función para eliminar en posición específica
+        async function deleteAt() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const position = parseInt(document.getElementById('deleteAtPosition').value);
+            
+            if (list.isEmpty()) {
+                explanationElement.textContent = `La lista está vacía. No hay nada que eliminar.`;
+                addLog(`Intentando eliminar de una lista vacía. Operación cancelada.`);
+                isAnimating = false;
+                return;
+            }
+            
+            // Verificar si la posición es válida
+            if (position < 0 || position >= list.getSize()) {
+                addLog(`Posición ${position} inválida. Debe estar entre 0 y ${list.getSize()-1}`);
+                explanationElement.textContent = `Posición ${position} inválida. Debe estar entre 0 y ${list.getSize()-1}.`;
+                isAnimating = false;
+                return;
+            }
+            
+            // Si es al inicio o al final, usar funciones específicas
+            if (position === 0) {
+                addLog(`Eliminación en posición 0, equivale a eliminar al inicio`);
+                await deleteAtBeginning();
+                isAnimating = false;
+                return;
+            }
+            
+            if (position === list.getSize() - 1) {
+                addLog(`Eliminación en última posición, equivale a eliminar al final`);
+                await deleteAtEnd();
+                isAnimating = false;
+                return;
+            }
+            
+            const nodes = list.toArray();
+            const removedNode = nodes[position];
+            explanationElement.textContent = `Eliminando el nodo con valor ${removedNode.value} en la posición ${position}.`;
+            
+            // Recorrer hasta la posición
+            addLog(`Recorriendo la lista hasta la posición ${position-1}`);
+            for (let i = 0; i < position; i++) {
+                renderList();
+                await highlightNode(nodes[i].id, 'highlight', 600);
+                addLog(`Visitando nodo en posición ${i}`);
+            }
+            
+            // Resaltar el nodo a eliminar
+            addLog(`Encontrado nodo anterior. Eliminando nodo en posición ${position} con valor ${removedNode.value}`);
+            await highlightNode(removedNode.id, 'highlight', 1000);
+            
+            // Eliminar el nodo
+            list.deleteAt(position);
+            renderList();
+            
+            // Actualizar explicación
+            explanationElement.textContent = `Se ha eliminado el nodo con valor ${removedNode.value} en la posición ${position}.`;
+            isAnimating = false;
+        }
+        
+        // Función para buscar un valor
+        async function search() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const value = parseInt(document.getElementById('searchValue').value);
+            explanationElement.textContent = `Buscando el valor ${value} en la lista.`;
+            addLog(`Iniciando búsqueda del valor ${value}`);
+            
+            if (list.isEmpty()) {
+                explanationElement.textContent = `La lista está vacía. No se encontró el valor ${value}.`;
+                addLog(`Lista vacía. Búsqueda terminada.`);
+                isAnimating = false;
+                return;
+            }
+            
+            const nodes = list.toArray();
+            let found = false;
+            
+            // Recorrer la lista
+            for (let i = 0; i < nodes.length; i++) {
+                renderList();
+                await highlightNode(nodes[i].id, 'highlight', 800);
+                addLog(`Examinando nodo en posición ${i} con valor ${nodes[i].value}`);
+                
+                if (nodes[i].value === value) {
+                    addLog(`¡Valor ${value} encontrado en la posición ${i}!`);
+                    explanationElement.textContent = `El valor ${value} se encontró en la posición ${i}.`;
+                    found = true;
+                    await highlightNode(nodes[i].id, 'new-node', 1500);
+                    break;
+                }
+            }
+            
+            if (!found) {
+                addLog(`Valor ${value} no encontrado en la lista`);
+                explanationElement.textContent = `El valor ${value} no se encontró en la lista.`;
+            }
+            
+            isAnimating = false;
+        }
+        
+        // Función para reiniciar la lista
+        function resetList() {
+            if (isAnimating) return;
+            
+            // Crear una nueva lista con valores predeterminados
+            list.head = null;
+            list.size = 0;
+            
+            // Añadir algunos nodos para empezar
+            list.insertAtEnd(10);
+            list.insertAtEnd(20);
+            list.insertAtEnd(30);
+            
+            renderList();
+            explanationElement.textContent = `La lista ha sido reiniciada con valores predeterminados.`;
+            addLog(`Lista reiniciada con valores [10, 20, 30]`);
+            logContainer.innerHTML = '';
+            addLog(`Registro de operaciones limpiado`);
+        }
+        
+        // Cambiar pestaña
+        function changeTab(tabId) {
+            // Ocultar todos los contenidos de las pestañas
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Desactivar todas las pestañas
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activar la pestaña seleccionada
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="changeTab('${tabId}')"]`).classList.add('active');
+        }
+        
+        // Inicializar la lista con algunos valores
+        resetList();
+    </script>
+</body>
+</html>
