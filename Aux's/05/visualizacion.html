@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Pilas y Colas</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #FF9800;
+            --element-bg: #e0e0e0;
+            --element-border: #bdbdbd;
+            --top-indicator: #f44336;
+            --front-indicator: #2196F3;
+            --back-indicator: #9C27B0;
+            --animation-speed: 0.5s;
+        }
+
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            justify-content: space-around;
+        }
+
+        .structure-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 300px; /* Para responsividad */
+            max-width: 550px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Para que los controles se ajusten */
+            align-items: center;
+        }
+
+        .controls input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex-grow: 1; /* Que ocupe espacio disponible */
+            min-width: 80px; /* Ancho mínimo */
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .controls button:hover {
+            opacity: 0.9;
+        }
+
+        .push-btn, .enqueue-btn { background-color: var(--primary-color); }
+        .pop-btn, .dequeue-btn { background-color: var(--secondary-color); }
+        .peek-btn { background-color: #607D8B; }
+
+
+        .visualization {
+            border: 2px solid #ccc;
+            min-height: 200px;
+            margin-bottom: 15px;
+            padding: 10px;
+            display: flex;
+            align-items: flex-end; /* Alinea elementos al fondo para la pila */
+            position: relative;
+            overflow: hidden; /* Para contener animaciones */
+        }
+
+        #stack-viz {
+            flex-direction: column-reverse; /* Pila crece hacia arriba */
+            align-items: center; /* Centra los elementos horizontalmente */
+        }
+
+        #queue-viz {
+            flex-direction: row; /* Cola es horizontal */
+            align-items: center; /* Centra verticalmente */
+            justify-content: flex-start; /* Elementos empiezan a la izquierda */
+            overflow-x: auto; /* Scroll si la cola es muy larga */
+            min-height: 60px; /* Altura fija para elementos de cola */
+        }
+
+        .data-element {
+            background-color: var(--element-bg);
+            border: 1px solid var(--element-border);
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            position: relative; /* Para indicadores */
+            transition: transform var(--animation-speed) ease, opacity var(--animation-speed) ease;
+            white-space: nowrap; /* Evita que el texto se divida */
+        }
+
+        /* --- Animaciones --- */
+        .data-element.entering {
+            opacity: 0;
+        }
+        #stack-viz .data-element.entering {
+            transform: translateY(-30px);
+        }
+         #queue-viz .data-element.entering {
+            transform: translateX(30px);
+        }
+
+        .data-element.leaving {
+            opacity: 0;
+        }
+        #stack-viz .data-element.leaving {
+            transform: translateY(-30px);
+        }
+        #queue-viz .data-element.leaving {
+            transform: translateX(-30px);
+        }
+
+
+        /* --- Indicadores --- */
+        .indicator {
+            position: absolute;
+            font-size: 0.7em;
+            font-weight: normal;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: white;
+        }
+
+        .top-indicator {
+            background-color: var(--top-indicator);
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .front-indicator {
+            background-color: var(--front-indicator);
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .back-indicator {
+            background-color: var(--back-indicator);
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .info-area {
+            margin-top: 15px;
+            border: 1px solid #eee;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .info-area h4 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        pre {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.85em;
+            margin: 5px 0;
+        }
+
+        #log-area {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1140px; /* Ajusta al ancho del contenedor flex */
+        }
+
+        #log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            color: #333;
+        }
+         #log-list li {
+             border-bottom: 1px solid #eee;
+             padding: 5px 0;
+         }
+         #log-list li:last-child {
+             border-bottom: none;
+         }
+
+        /* --- Media Queries para Responsividad --- */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .structure-container {
+                width: 90%; /* Ocupa más ancho en pantallas pequeñas */
+                max-width: none; /* Anula max-width */
+            }
+            .controls {
+                flex-direction: column; /* Apila controles verticalmente */
+                align-items: stretch; /* Estira los elementos */
+            }
+            .controls input[type="text"] {
+                 margin-bottom: 10px; /* Espacio debajo del input */
+            }
+             #queue-viz {
+                 min-height: 50px; /* Reduce un poco la altura mínima */
+             }
+             .data-element {
+                 padding: 8px 12px;
+                 font-size: 0.9em;
+             }
+        }
+
+    </style>
+</head>
+<body>
+
+<h1>Visualizador Interactivo de Pilas (Stacks) y Colas (Queues)</h1>
+
+<div class="container">
+    <div class="structure-container">
+        <h2>Pila (Stack - LIFO)</h2>
+        <div class="controls">
+            <input type="text" id="stack-value" placeholder="Valor">
+            <button id="stack-push-btn" class="push-btn">Push</button>
+            <button id="stack-pop-btn" class="pop-btn">Pop</button>
+            <button id="stack-peek-btn" class="peek-btn">Peek (Top)</button>
+        </div>
+        <div class="visualization" id="stack-viz">
+            </div>
+        <div class="info-area">
+            <h4>Operación Actual: <span id="stack-op-name">-</span></h4>
+            <p id="stack-explanation">Realiza una operación para ver la explicación.</p>
+            <h4>Código Ejemplo (JavaScript):</h4>
+            <pre><code id="stack-code-example">// Equivalente en JS aparecerá aquí</code></pre>
+        </div>
+    </div>
+
+    <div class="structure-container">
+        <h2>Cola (Queue - FIFO)</h2>
+        <div class="controls">
+            <input type="text" id="queue-value" placeholder="Valor">
+            <button id="queue-enqueue-btn" class="enqueue-btn">Enqueue</button>
+            <button id="queue-dequeue-btn" class="dequeue-btn">Dequeue</button>
+            <button id="queue-peek-front-btn" class="peek-btn">Peek Front</button>
+            <button id="queue-peek-back-btn" class="peek-btn">Peek Back</button>
+        </div>
+        <div class="visualization" id="queue-viz">
+            </div>
+        <div class="info-area">
+            <h4>Operación Actual: <span id="queue-op-name">-</span></h4>
+            <p id="queue-explanation">Realiza una operación para ver la explicación.</p>
+            <h4>Código Ejemplo (JavaScript):</h4>
+            <pre><code id="queue-code-example">// Equivalente en JS aparecerá aquí</code></pre>
+        </div>
+    </div>
+</div>
+    
+<div id="log-area">
+    <h3>Registro de Acciones</h3>
+    <ul id="log-list">
+        <li>Visualizador iniciado.</li>
+    </ul>
+</div>
+
+<script>
+    // --- Variables Globales ---
+    const stack = [];
+    const queue = [];
+    const MAX_LOG_ENTRIES = 20;
+
+    // --- Elementos del DOM ---
+    // Pila
+    const stackViz = document.getElementById('stack-viz');
+    const stackValueInput = document.getElementById('stack-value');
+    const stackPushBtn = document.getElementById('stack-push-btn');
+    const stackPopBtn = document.getElementById('stack-pop-btn');
+    const stackPeekBtn = document.getElementById('stack-peek-btn');
+    const stackOpName = document.getElementById('stack-op-name');
+    const stackExplanation = document.getElementById('stack-explanation');
+    const stackCodeExample = document.getElementById('stack-code-example');
+
+    // Cola
+    const queueViz = document.getElementById('queue-viz');
+    const queueValueInput = document.getElementById('queue-value');
+    const queueEnqueueBtn = document.getElementById('queue-enqueue-btn');
+    const queueDequeueBtn = document.getElementById('queue-dequeue-btn');
+    const queuePeekFrontBtn = document.getElementById('queue-peek-front-btn');
+    const queuePeekBackBtn = document.getElementById('queue-peek-back-btn');
+    const queueOpName = document.getElementById('queue-op-name');
+    const queueExplanation = document.getElementById('queue-explanation');
+    const queueCodeExample = document.getElementById('queue-code-example');
+
+    // Log
+    const logList = document.getElementById('log-list');
+
+    // --- Funciones de Utilidad ---
+    function logAction(message) {
+        const li = document.createElement('li');
+        const timestamp = new Date().toLocaleTimeString();
+        li.textContent = `[${timestamp}] ${message}`;
+        logList.insertBefore(li, logList.firstChild); // Añade al principio
+
+        // Limitar número de entradas en el log
+        if (logList.children.length > MAX_LOG_ENTRIES) {
+            logList.removeChild(logList.lastChild);
+        }
+    }
+
+    function createDataElement(value) {
+        const element = document.createElement('div');
+        element.classList.add('data-element');
+        element.textContent = value;
+        return element;
+    }
+
+    function updateInfo(area, opName, explanation, code) {
+        document.getElementById(`${area}-op-name`).textContent = opName;
+        document.getElementById(`${area}-explanation`).textContent = explanation;
+        document.getElementById(`${area}-code-example`).textContent = code;
+    }
+
+    // --- Lógica de la Pila (Stack) ---
+    function updateStackView() {
+        stackViz.innerHTML = ''; // Limpia la visualización anterior
+        stack.forEach((value, index) => {
+            const element = createDataElement(value);
+            if (index === stack.length - 1) { // Es el elemento 'top'
+                const topIndicator = document.createElement('span');
+                topIndicator.classList.add('indicator', 'top-indicator');
+                topIndicator.textContent = 'TOP';
+                element.appendChild(topIndicator);
+                element.style.borderColor = 'var(--top-indicator)';
+            }
+            stackViz.appendChild(element); // Se añade al final, pero CSS lo pone arriba (column-reverse)
+        });
+    }
+
+    function handleStackPush() {
+        const value = stackValueInput.value.trim();
+        if (!value) {
+            logAction('Pila: Intento de Push con valor vacío.');
+            alert('Por favor, ingresa un valor para hacer push.');
+            return;
+        }
+        stack.push(value);
+
+        // Animación de entrada
+        const element = createDataElement(value);
+        element.classList.add('entering');
+        stackViz.appendChild(element); // Añadir al final (visualmente arriba)
+        // Forzar reflow para iniciar la animación
+        void element.offsetWidth;
+        element.classList.remove('entering');
+
+        // Actualizar vista después de la animación para los indicadores
+        setTimeout(() => {
+            updateStackView();
+            logAction(`Pila: Push(${value}). Tamaño: ${stack.length}`);
+            updateInfo('stack', 'Push',
+                'Añade un elemento al tope (final) de la pila. LIFO: El último en entrar es el primero en salir.',
+                `miPila.push("${value}"); \n// o en C++: miPila.push("${value}");`);
+            stackValueInput.value = ''; // Limpiar input
+        }, 50); // Pequeño delay para asegurar que la animación se aplique antes de la actualización final
+    }
+
+    function handleStackPop() {
+        if (stack.length === 0) {
+            logAction('Pila: Intento de Pop en pila vacía.');
+            alert('La pila está vacía.');
+            updateInfo('stack', 'Pop (Error)', 'No se puede hacer pop en una pila vacía.', '// No hay operación equivalente en pila vacía.');
+            return;
+        }
+
+        const poppedValue = stack[stack.length - 1]; // Valor que se va a sacar
+        const elementToRemove = stackViz.lastChild; // El último elemento añadido al DOM (visualmente el top)
+
+        if (elementToRemove) {
+            elementToRemove.classList.add('leaving'); // Aplicar clase para animación de salida
+            // Esperar a que termine la animación antes de quitarlo del array y actualizar la vista
+            setTimeout(() => {
+                stack.pop();
+                updateStackView(); // Actualiza la vista quitando el elemento y reasignando el 'top' si es necesario
+                logAction(`Pila: Pop(). Se quitó "${poppedValue}". Tamaño: ${stack.length}`);
+                updateInfo('stack', 'Pop',
+                    'Quita y devuelve el elemento del tope de la pila.',
+                    `let valor = miPila.pop(); \n// o en C++: miPila.pop(); T valor = miPila.top();`);
+            }, 500); // Debe coincidir con --animation-speed
+        } else {
+             // Fallback si no se encontró el elemento DOM (raro)
+             stack.pop();
+             updateStackView();
+             logAction(`Pila: Pop() [sin animación]. Se quitó "${poppedValue}". Tamaño: ${stack.length}`);
+             updateInfo('stack', 'Pop',
+                 'Quita y devuelve el elemento del tope de la pila.',
+                 `let valor = miPila.pop(); \n// o en C++: miPila.pop(); T valor = miPila.top();`);
+        }
+    }
+
+    function handleStackPeek() {
+        if (stack.length === 0) {
+            logAction('Pila: Intento de Peek en pila vacía.');
+            alert('La pila está vacía.');
+            updateInfo('stack', 'Peek (Error)', 'No se puede hacer peek en una pila vacía.', '// No hay operación equivalente en pila vacía.');
+            return;
+        }
+        const topValue = stack[stack.length - 1];
+        logAction(`Pila: Peek(). Elemento top: "${topValue}"`);
+        updateInfo('stack', 'Peek / Top',
+            'Devuelve el elemento del tope de la pila sin quitarlo.',
+            `let valor = miPila[miPila.length - 1]; \n// o en C++: T valor = miPila.top();`);
+
+        // Resaltar temporalmente el elemento top
+        const topElement = stackViz.lastChild;
+        if(topElement) {
+            topElement.style.transition = 'background-color 0.2s ease-in-out';
+            topElement.style.backgroundColor = '#fbc02d'; // Amarillo para destacar
+            setTimeout(() => {
+                topElement.style.backgroundColor = ''; // Volver al color original
+            }, 1000); // Destacar por 1 segundo
+        }
+    }
+
+
+    // --- Lógica de la Cola (Queue) ---
+    function updateQueueView() {
+        queueViz.innerHTML = ''; // Limpia la visualización anterior
+        queue.forEach((value, index) => {
+            const element = createDataElement(value);
+            if (index === 0) { // Elemento 'front'
+                const frontIndicator = document.createElement('span');
+                frontIndicator.classList.add('indicator', 'front-indicator');
+                frontIndicator.textContent = 'FRONT';
+                element.appendChild(frontIndicator);
+                element.style.borderColor = 'var(--front-indicator)';
+            }
+            if (index === queue.length - 1) { // Elemento 'back'
+                const backIndicator = document.createElement('span');
+                backIndicator.classList.add('indicator', 'back-indicator');
+                backIndicator.textContent = 'BACK';
+                element.appendChild(backIndicator);
+                 // Si solo hay un elemento, ambos indicadores estarán allí, así que priorizamos el color de front visualmente.
+                if(queue.length > 1) {
+                    element.style.borderColor = 'var(--back-indicator)';
+                }
+                 // Si es el único elemento, también es 'front'
+                if(queue.length === 1) {
+                     element.style.borderColor = 'var(--front-indicator)'; // Front tiene prioridad si solo hay uno
+                }
+
+            }
+            queueViz.appendChild(element);
+        });
+         // Ajustar scroll para ver el final si es necesario
+         queueViz.scrollLeft = queueViz.scrollWidth;
+    }
+
+     function handleQueueEnqueue() {
+        const value = queueValueInput.value.trim();
+        if (!value) {
+            logAction('Cola: Intento de Enqueue con valor vacío.');
+            alert('Por favor, ingresa un valor para hacer enqueue.');
+            return;
+        }
+
+        // Animación de entrada
+        const element = createDataElement(value);
+        element.classList.add('entering');
+        queueViz.appendChild(element); // Añadir al final (visualmente a la derecha)
+
+        // Forzar reflow para iniciar la animación
+        void element.offsetWidth;
+        element.classList.remove('entering');
+
+        // Actualizar array y vista después de la animación
+        setTimeout(() => {
+            queue.push(value); // Añadir al final del array
+            updateQueueView(); // Actualizar indicadores y estado final
+            logAction(`Cola: Enqueue(${value}). Tamaño: ${queue.length}`);
+            updateInfo('queue', 'Enqueue',
+                'Añade un elemento al final (back) de la cola. FIFO: El primero en entrar es el primero en salir.',
+                `miCola.push("${value}"); // Usando array JS \n// o en C++: miCola.push("${value}");`);
+            queueValueInput.value = ''; // Limpiar input
+        }, 50); // Pequeño delay
+    }
+
+
+    function handleQueueDequeue() {
+        if (queue.length === 0) {
+            logAction('Cola: Intento de Dequeue en cola vacía.');
+            alert('La cola está vacía.');
+            updateInfo('queue', 'Dequeue (Error)', 'No se puede hacer dequeue en una cola vacía.', '// No hay operación equivalente en cola vacía.');
+            return;
+        }
+
+        const dequeuedValue = queue[0]; // Valor que se va a sacar (del frente)
+        const elementToRemove = queueViz.firstChild; // El primer elemento en el DOM (visualmente el frente)
+
+        if (elementToRemove) {
+            elementToRemove.classList.add('leaving'); // Animación de salida
+
+            setTimeout(() => {
+                queue.shift(); // Quita el primer elemento del array
+                updateQueueView();
+                logAction(`Cola: Dequeue(). Se quitó "${dequeuedValue}". Tamaño: ${queue.length}`);
+                updateInfo('queue', 'Dequeue',
+                    'Quita y devuelve el elemento del frente (front) de la cola.',
+                    `let valor = miCola.shift(); \n// o en C++: miCola.pop(); T valor = miCola.front();`);
+            }, 500); // Coincide con --animation-speed
+        } else {
+            // Fallback
+            queue.shift();
+            updateQueueView();
+             logAction(`Cola: Dequeue() [sin animación]. Se quitó "${dequeuedValue}". Tamaño: ${queue.length}`);
+             updateInfo('queue', 'Dequeue',
+                'Quita y devuelve el elemento del frente (front) de la cola.',
+                `let valor = miCola.shift(); \n// o en C++: miCola.pop(); T valor = miCola.front();`);
+        }
+    }
+
+    function handleQueuePeekFront() {
+        if (queue.length === 0) {
+            logAction('Cola: Intento de Peek Front en cola vacía.');
+            alert('La cola está vacía.');
+             updateInfo('queue', 'Peek Front (Error)', 'No se puede hacer peek front en una cola vacía.', '// No hay operación en cola vacía.');
+            return;
+        }
+        const frontValue = queue[0];
+        logAction(`Cola: Peek Front(). Elemento front: "${frontValue}"`);
+        updateInfo('queue', 'Peek Front',
+            'Devuelve el elemento del frente de la cola sin quitarlo.',
+            `let valor = miCola[0]; \n// o en C++: T valor = miCola.front();`);
+
+        // Resaltar temporalmente
+        const frontElement = queueViz.firstChild;
+        if(frontElement) {
+            frontElement.style.transition = 'background-color 0.2s ease-in-out';
+            frontElement.style.backgroundColor = '#81d4fa'; // Azul claro para destacar
+            setTimeout(() => {
+                frontElement.style.backgroundColor = '';
+            }, 1000);
+        }
+    }
+
+    function handleQueuePeekBack() {
+         if (queue.length === 0) {
+            logAction('Cola: Intento de Peek Back en cola vacía.');
+            alert('La cola está vacía.');
+             updateInfo('queue', 'Peek Back (Error)', 'No se puede hacer peek back en una cola vacía.', '// No hay operación en cola vacía.');
+            return;
+        }
+        const backValue = queue[queue.length - 1];
+        logAction(`Cola: Peek Back(). Elemento back: "${backValue}"`);
+        updateInfo('queue', 'Peek Back',
+            'Devuelve el elemento del final (back) de la cola sin quitarlo.',
+            `let valor = miCola[miCola.length - 1]; \n// o en C++: T valor = miCola.back();`);
+
+        // Resaltar temporalmente
+        const backElement = queueViz.lastChild;
+         if(backElement) {
+            backElement.style.transition = 'background-color 0.2s ease-in-out';
+            backElement.style.backgroundColor = '#ce93d8'; // Morado claro para destacar
+            setTimeout(() => {
+                backElement.style.backgroundColor = '';
+            }, 1000);
+        }
+    }
+
+
+    // --- Event Listeners ---
+    // Pila
+    stackPushBtn.addEventListener('click', handleStackPush);
+    stackPopBtn.addEventListener('click', handleStackPop);
+    stackPeekBtn.addEventListener('click', handleStackPeek);
+    stackValueInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleStackPush();
+        }
+    });
+
+    // Cola
+    queueEnqueueBtn.addEventListener('click', handleQueueEnqueue);
+    queueDequeueBtn.addEventListener('click', handleQueueDequeue);
+    queuePeekFrontBtn.addEventListener('click', handleQueuePeekFront);
+    queuePeekBackBtn.addEventListener('click', handleQueuePeekBack);
+     queueValueInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleQueueEnqueue();
+        }
+    });
+
+
+    // --- Inicialización ---
+    // (Opcional: Añadir algunos elementos iniciales para demostración)
+    // stack.push('A'); stack.push('B');
+    // queue.push('X'); queue.push('Y');
+    updateStackView();
+    updateQueueView();
+    updateInfo('stack', '-', 'Realiza una operación para ver la explicación.', '// Esperando operación...');
+    updateInfo('queue', '-', 'Realiza una operación para ver la explicación.', '// Esperando operación...');
+    logAction("Visualizador listo.");
+
+</script>
+
+</body>
+</html>

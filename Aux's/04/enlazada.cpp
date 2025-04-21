@@ -103,6 +103,15 @@ void ll_display() {
 }
 
 int main() {
+
+
+
+    
+    ll_insertAtBeginning(2);
+    cout << head->next << endl;
+    
+
+    /*
     cout << "Ejemplo de lista basada en arreglos:" << endl;
     arr_insertAtEnd(1);
     arr_insertAtEnd(2);
@@ -128,6 +137,7 @@ int main() {
     ll_display();
     cout << "Buscar 2: " << (ll_search(2) ? "Encontrado" : "No encontrado") << endl;
     cout << "Buscar 3: " << (ll_search(3) ? "Encontrado" : "No encontrado") << endl;
+    */
 
     return 0;
 }
