@@ -11,7 +11,7 @@ int main(){
 
     string s;cin >> s;
     stack<char> pila;
-    for(char c:s){
+    for(char &c:s){
         if(c == '('){
             pila.push(c);
         }

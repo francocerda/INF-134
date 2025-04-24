@@ -21,8 +21,8 @@ public:
     void encolar(int elemento); // Agregar al final
     void desencolar();          // Eliminar el frente
     int verFrente();            // Ver el elemento del frente
-    bool estaVacia();           // ¿Está vacía?
-    bool estaLlena();           // ¿Está llena?
+    bool estaVacia();          
+    bool estaLlena();           
     int tamanio();              // Número de elementos
 };
 
@@ -45,8 +45,8 @@ void Cola::encolar(int elemento) {
         cerr << "Error: Cola llena!" << endl;
         exit(1);
     }
-    // Mover el índice "final" de manera circular
-    final = (final + 1) % capacidad;
+    
+    final = (final + 1);
     arreglo[final] = elemento;
     contador++;
 }
@@ -57,7 +57,7 @@ void Cola::desencolar() {
         exit(1);
     }
     // Mover el índice "frente" de manera circular
-    frente = (frente + 1) % capacidad;
+    frente = (frente + 1);
     contador--;
 }
 
