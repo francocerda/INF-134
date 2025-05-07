@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diccionarios en C++</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+        }
+        
+        .tabbed-content {
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            border: 1px solid #ddd;
+            border-bottom: none;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            background-color: white;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .code-block {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .dictionary-viz {
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .hash-table {
+            border: 1px solid #ddd;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .hash-table th, .hash-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .hash-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .node {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+        
+        .edge {
+            position: absolute;
+            height: 2px;
+            background-color: #2c3e50;
+            transform-origin: 0 0;
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+        
+        .graph-container {
+            position: relative;
+            height: 400px;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        
+        .dictionary-entry {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .key {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .value {
+            color: #2980b9;
+        }
+        
+        .operation-log {
+            height: 150px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .animation-container {
+            position: relative;
+            height: 200px;
+            margin: 20px 0;
+        }
+        
+        .explanation {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .tip {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 15px 0;
+        }
+        
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visualización de Diccionarios en C++</h1>
+        
+        <div class="tabbed-content">
+            <div class="tabs">
+                <div class="tab active" data-tab="basics">Conceptos Básicos</div>
+                <div class="tab" data-tab="operations">Operaciones</div>
+                <div class="tab" data-tab="implementation">Implementación</div>
+                <div class="tab" data-tab="graphs">Diccionarios y Grafos</div>
+            </div>
+            
+            <div class="tab-content active" id="basics">
+                <h2>¿Qué es un Diccionario en C++?</h2>
+                <p>Un diccionario en C++ es una estructura de datos que almacena pares de <span class="highlight">clave-valor</span>. En la biblioteca estándar (STL) existen principalmente dos implementaciones:</p>
+                <ul>
+                    <li><strong>std::map</strong>: Implementado como un árbol binario de búsqueda balanceado (usualmente un árbol rojo-negro). Las claves se mantienen ordenadas.</li>
+                    <li><strong>std::unordered_map</strong>: Implementado como una tabla hash. Las claves no están ordenadas, pero ofrece un tiempo de acceso más rápido en promedio.</li>
+                </ul>
+                
+                <div class="explanation">
+                    <h3>¿Cómo funciona internamente?</h3>
+                    <p>Un diccionario tipo <strong>unordered_map</strong> funciona usando una función hash que convierte cada clave en un índice de una tabla. Esto permite buscar valores en tiempo constante O(1) en el caso promedio.</p>
+                </div>
+                
+                <div class="animation-container">
+                    <canvas id="hashAnimation" width="900" height="200"></canvas>
+                </div>
+                
+                <div class="code-block">
+<pre>// Declaración de un diccionario en C++
+std::map&lt;std::string, int&gt; edades;                // Ordenado
+std::unordered_map&lt;std::string, int&gt; salarios;   // No ordenado (tabla hash)</pre>
+                </div>
+                
+                <div class="tip">
+                    <p><strong>Consejo:</strong> Usa <code>std::map</code> cuando necesites que las claves estén ordenadas o cuando necesites operaciones como encontrar el siguiente elemento mayor. Usa <code>std::unordered_map</code> cuando solo necesites acceso rápido por clave y no te importe el orden.</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="operations">
+                <h2>Operaciones con Diccionarios</h2>
+                
+                <div class="controls">
+                    <input type="text" id="keyInput" placeholder="Clave">
+                    <input type="text" id="valueInput" placeholder="Valor">
+                    <button id="insertBtn">Insertar</button>
+                    <button id="findBtn">Buscar</button>
+                    <button id="deleteBtn">Eliminar</button>
+                    <button id="clearBtn">Limpiar</button>
+                </div>
+                
+                <h3>Visualización del Diccionario:</h3>
+                <div class="dictionary-viz">
+                    <div id="dictionaryDisplay"></div>
+                </div>
+                
+                <h3>Registro de Operaciones:</h3>
+                <div class="operation-log" id="operationLog"></div>
+                
+                <h3>Código Equivalente:</h3>
+                <div class="code-block" id="operationCode">
+<pre>// Código de la operación se mostrará aquí
+std::unordered_map&lt;std::string, std::string&gt; diccionario;</pre>
+                </div>
+                
+                <div class="explanation">
+                    <h3>Complejidad de las Operaciones</h3>
+                    <ul>
+                        <li><strong>Inserción:</strong> O(1) promedio para unordered_map, O(log n) para map</li>
+                        <li><strong>Búsqueda:</strong> O(1) promedio para unordered_map, O(log n) para map</li>
+                        <li><strong>Eliminación:</strong> O(1) promedio para unordered_map, O(log n) para map</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="implementation">
+                <h2>Implementación Interna</h2>
+                
+                <p>Internamente, un <code>std::unordered_map</code> utiliza una tabla hash con manejo de colisiones. Veamos una representación simplificada:</p>
+                
+                <div class="animation-container">
+                    <table class="hash-table" id="hashTableVisualization">
+                        <thead>
+                            <tr>
+                                <th>Índice Hash</th>
+                                <th>Entradas (Clave → Valor)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="explanation">
+                    <h3>¿Cómo maneja las colisiones?</h3>
+                    <p>Cuando dos claves diferentes producen el mismo valor hash (colisión), el <code>unordered_map</code> utiliza una lista enlazada o alguna estructura similar para almacenar múltiples entradas en el mismo "bucket" (cubeta).</p>
+                </div>
+                
+                <div class="code-block">
+<pre>// Implementación simplificada de un unordered_map
+template &lt;typename Key, typename Value, typename Hash = std::hash&lt;Key&gt;&gt;
+class SimpleUnorderedMap {
+private:
+    struct Entry {
+        Key key;
+        Value value;
+        Entry* next;
+    };
+    
+    std::vector&lt;Entry*&gt; buckets;
+    size_t size;
+    
+    size_t hashFunction(const Key& key) {
+        Hash hasher;
+        return hasher(key) % buckets.size();
+    }
+    
+public:
+    // Métodos de la clase...
+};</pre>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="graphs">
+                <h2>Diccionarios en la Implementación de Grafos</h2>
+                
+                <p>Los diccionarios son muy útiles para implementar grafos en C++. Veamos cómo podemos representar un grafo usando diccionarios:</p>
+                
+                <div class="controls">
+                    <input type="text" id="sourceNode" placeholder="Nodo origen">
+                    <input type="text" id="targetNode" placeholder="Nodo destino">
+                    <input type="text" id="edgeWeight" placeholder="Peso (opcional)">
+                    <button id="addNodeBtn">Añadir Nodo</button>
+                    <button id="addEdgeBtn">Añadir Arista</button>
+                    <button id="clearGraphBtn">Limpiar Grafo</button>
+                </div>
+                
+                <div class="graph-container" id="graphVisualization"></div>
+                
+                <h3>Representación del Grafo como Lista de Adyacencia:</h3>
+                <div class="code-block" id="graphCode">
+<pre>// Representación de un grafo usando unordered_map
+std::unordered_map&lt;std::string, std::vector&lt;std::string&gt;&gt; grafo;</pre>
+                </div>
+                
+                <div class="explanation">
+                    <h3>¿Por qué usar diccionarios para grafos?</h3>
+                    <ul>
+                        <li>Acceso eficiente a los vecinos de un nodo O(1)</li>
+                        <li>Facilidad para añadir/eliminar nodos y aristas</li>
+                        <li>Flexibilidad para representar grafos con nodos no numéricos</li>
+                        <li>Posibilidad de almacenar información adicional (pesos, atributos, etc.)</li>
+                    </ul>
+                </div>
+                
+                <div class="tip">
+                    <p><strong>Implementaciones comunes:</strong></p>
+                    <ul>
+                        <li><code>unordered_map&lt;Nodo, vector&lt;Nodo&gt;&gt;</code>: Para grafo simple</li>
+                        <li><code>unordered_map&lt;Nodo, unordered_map&lt;Nodo, int&gt;&gt;</code>: Para grafo ponderado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Navegación por pestañas
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Desactivar todas las pestañas y contenidos
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Activar la pestaña seleccionada y su contenido
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // ----------------- ANIMACIÓN DE HASH -----------------
+        const canvas = document.getElementById('hashAnimation');
+        const ctx = canvas.getContext('2d');
+        
+        // Función para dibujar la animación de hash
+        function drawHashAnimation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar la clave
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(50, 80, 120, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.fillText('Clave: "Juan"', 60, 105);
+            
+            // Dibujar la función hash
+            ctx.fillStyle = '#3498db';
+            ctx.beginPath();
+            ctx.arc(250, 100, 50, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.fillText('Función', 230, 95);
+            ctx.fillText('Hash', 235, 115);
+            
+            // Dibujar la flecha hacia la función hash
+            ctx.beginPath();
+            ctx.moveTo(170, 100);
+            ctx.lineTo(200, 100);
+            ctx.stroke();
+            
+            // Dibujar el resultado del hash
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(350, 80, 100, 40);
+            ctx.fillStyle = 'white';
+            ctx.fillText('Índice: 3', 365, 105);
+            
+            // Dibujar la flecha desde la função hash
+            ctx.beginPath();
+            ctx.moveTo(300, 100);
+            ctx.lineTo(350, 100);
+            ctx.stroke();
+            
+            // Dibujar la tabla hash
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(500, 40, 300, 120);
+            ctx.strokeRect(500, 40, 300, 120);
+            
+            // Dibujar las casillas de la tabla
+            ctx.fillStyle = 'white';
+            for (let i = 0; i < 5; i++) {
+                ctx.strokeRect(520 + i*60, 60, 60, 80);
+                ctx.fillText(i, 545 + i*60, 50);
+            }
+            
+            // Dibujar el valor en la posición 3
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('"Juan"', 525, 85);
+            ctx.fillStyle = '#2980b9';
+            ctx.fillText('25', 535, 105);
+            
+            // Dibujar la flecha hacia la tabla
+            ctx.beginPath();
+            ctx.moveTo(450, 100);
+            ctx.lineTo(500, 100);
+            ctx.stroke();
+            
+            // Marcar la posición 3
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(520 + 3*60, 60, 60, 80);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+        }
+        
+        // Dibujar la animación inicialmente
+        drawHashAnimation();
+        
+        // ----------------- OPERACIONES DEL DICCIONARIO -----------------
+        const dictionary = {};
+        const dictionaryDisplay = document.getElementById('dictionaryDisplay');
+        const operationLog = document.getElementById('operationLog');
+        const operationCode = document.getElementById('operationCode');
+        
+        function updateDictionaryDisplay() {
+            dictionaryDisplay.innerHTML = '';
+            
+            if (Object.keys(dictionary).length === 0) {
+                dictionaryDisplay.innerHTML = '<p><em>El diccionario está vacío</em></p>';
+                return;
+            }
+            
+            for (const key in dictionary) {
+                const entry = document.createElement('div');
+                entry.className = 'dictionary-entry';
+                entry.innerHTML = `<span class="key">${key}</span> → <span class="value">${dictionary[key]}</span>`;
+                dictionaryDisplay.appendChild(entry);
+            }
+        }
+        
+        function logOperation(operation) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = operation;
+            operationLog.appendChild(logEntry);
+            operationLog.scrollTop = operationLog.scrollHeight;
+        }
+        
+        document.getElementById('insertBtn').addEventListener('click', () => {
+            const key = document.getElementById('keyInput').value.trim();
+            const value = document.getElementById('valueInput').value.trim();
+            
+            if (key && value) {
+                const exists = key in dictionary;
+                dictionary[key] = value;
+                
+                if (exists) {
+                    logOperation(`Actualizado: ${key} → ${value}`);
+                    operationCode.innerHTML = `<pre>diccionario["${key}"] = "${value}"; // Actualización</pre>`;
+                } else {
+                    logOperation(`Insertado: ${key} → ${value}`);
+                    operationCode.innerHTML = `<pre>diccionario.insert({"${key}", "${value}"}); // Inserción</pre>`;
+                }
+                
+                updateDictionaryDisplay();
+                updateHashTable();
+            } else {
+                alert('Por favor ingresa una clave y un valor');
+            }
+        });
+        
+        document.getElementById('findBtn').addEventListener('click', () => {
+            const key = document.getElementById('keyInput').value.trim();
+            
+            if (key) {
+                if (key in dictionary) {
+                    logOperation(`Encontrado: ${key} → ${dictionary[key]}`);
+                    operationCode.innerHTML = `<pre>auto it = diccionario.find("${key}");
+if (it != diccionario.end()) {
+    std::cout << "Valor: " << it->second << std::endl;
+}</pre>`;
+                } else {
+                    logOperation(`Clave no encontrada: ${key}`);
+                    operationCode.innerHTML = `<pre>auto it = diccionario.find("${key}");
+if (it == diccionario.end()) {
+    std::cout << "Clave no encontrada" << std::endl;
+}</pre>`;
+                }
+            } else {
+                alert('Por favor ingresa una clave para buscar');
+            }
+        });
+        
+        document.getElementById('deleteBtn').addEventListener('click', () => {
+            const key = document.getElementById('keyInput').value.trim();
+            
+            if (key) {
+                if (key in dictionary) {
+                    delete dictionary[key];
+                    logOperation(`Eliminado: ${key}`);
+                    operationCode.innerHTML = `<pre>diccionario.erase("${key}"); // Eliminación</pre>`;
+                    updateDictionaryDisplay();
+                    updateHashTable();
+                } else {
+                    logOperation(`Clave no encontrada para eliminar: ${key}`);
+                    operationCode.innerHTML = `<pre>diccionario.erase("${key}"); // No se encontró la clave</pre>`;
+                }
+            } else {
+                alert('Por favor ingresa una clave para eliminar');
+            }
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            Object.keys(dictionary).forEach(key => delete dictionary[key]);
+            logOperation('Diccionario limpiado');
+            operationCode.innerHTML = `<pre>diccionario.clear(); // Limpieza del diccionario</pre>`;
+            updateDictionaryDisplay();
+            updateHashTable();
+        });
+        
+        // Inicializar la visualización
+        updateDictionaryDisplay();
+        
+        // ----------------- VISUALIZACIÓN DE LA TABLA HASH -----------------
+        const hashTable = document.getElementById('hashTableVisualization').getElementsByTagName('tbody')[0];
+        
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = (hash + str.charCodeAt(i)) % 10;
+            }
+            return hash;
+        }
+        
+        function updateHashTable() {
+            // Limpiar la tabla
+            hashTable.innerHTML = '';
+            
+            // Crear un array para los buckets
+            const buckets = Array(10).fill().map(() => []);
+            
+            // Distribuir las entradas en los buckets
+            for (const key in dictionary) {
+                const hash = simpleHash(key);
+                buckets[hash].push({ key, value: dictionary[key] });
+            }
+            
+            // Generar las filas de la tabla
+            for (let i = 0; i < buckets.length; i++) {
+                const row = document.createElement('tr');
+                const indexCell = document.createElement('td');
+                indexCell.textContent = i;
+                row.appendChild(indexCell);
+                
+                const entriesCell = document.createElement('td');
+                if (buckets[i].length === 0) {
+                    entriesCell.innerHTML = '<em>(vacío)</em>';
+                } else {
+                    buckets[i].forEach(entry => {
+                        const entryDiv = document.createElement('div');
+                        entryDiv.innerHTML = `<span class="key">${entry.key}</span> → <span class="value">${entry.value}</span>`;
+                        entriesCell.appendChild(entryDiv);
+                    });
+                }
+                row.appendChild(entriesCell);
+                
+                hashTable.appendChild(row);
+            }
+        }
+        
+        // Inicializar la tabla hash
+        updateHashTable();
+        
+        // ----------------- VISUALIZACIÓN DE GRAFOS -----------------
+        const graph = {};
+        const graphContainer = document.getElementById('graphVisualization');
+        const graphCode = document.getElementById('graphCode');
+        
+        function updateGraphCode() {
+            let code = `// Representación de un grafo usando unordered_map\nstd::unordered_map<std::string, std::vector<std::pair<std::string, int>>> grafo = {\n`;
+            
+            for (const node in graph) {
+                code += `    {"${node}", {`;
+                
+                const neighbors = graph[node].map(n => {
+                    if (n.weight) {
+                        return `{"${n.target}", ${n.weight}}`;
+                    }
+                    return `{"${n.target}", 1}`;
+                }).join(', ');
+                
+                code += neighbors + '}},\n';
+            }
+            
+            code += '};';
+            graphCode.innerHTML = `<pre>${code}</pre>`;
+        }
+        
+        function createNode(id, x, y) {
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.textContent = id;
+            nodeElement.style.left = `${x}px`;
+            nodeElement.style.top = `${y}px`;
+            nodeElement.dataset.id = id;
+            graphContainer.appendChild(nodeElement);
+        }
+        
+        function createEdge(source, target, weight) {
+            const sourceNode = document.querySelector(`.node[data-id="${source}"]`);
+            const targetNode = document.querySelector(`.node[data-id="${target}"]`);
+            
+            if (!sourceNode || !targetNode) return;
+            
+            const sourceRect = sourceNode.getBoundingClientRect();
+            const targetRect = targetNode.getBoundingClientRect();
+            
+            const containerRect = graphContainer.getBoundingClientRect();
+            
+            const sourceX = sourceRect.left + sourceRect.width/2 - containerRect.left;
+            const sourceY = sourceRect.top + sourceRect.height/2 - containerRect.top;
+            const targetX = targetRect.left + targetRect.width/2 - containerRect.left;
+            const targetY = targetRect.top + targetRect.height/2 - containerRect.top;
+            
+            const dx = targetX - sourceX;
+            const dy = targetY - sourceY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            const edge = document.createElement('div');
+            edge.className = 'edge';
+            edge.style.width = `${length}px`;
+            edge.style.left = `${sourceX}px`;
+            edge.style.top = `${sourceY}px`;
+            edge.style.transform = `rotate(${angle}deg)`;
+            edge.dataset.source = source;
+            edge.dataset.target = target;
+            
+            if (weight) {
+                const weightLabel = document.createElement('div');
+                weightLabel.style.position = 'absolute';
+                weightLabel.style.left = `${sourceX + dx/2 - 10}px`;
+                weightLabel.style.top = `${sourceY + dy/2 - 10}px`;
+                weightLabel.textContent = weight;
+                weightLabel.style.backgroundColor = 'white';
+                weightLabel.style.padding = '2px 5px';
+                weightLabel.style.borderRadius = '10px';
+                weightLabel.style.fontSize = '12px';
+                graphContainer.appendChild(weightLabel);
+            }
+            
+            graphContainer.appendChild(edge);
+        }
+        
+        function updateGraphVisualization() {
+            // Limpiar el contenedor
+            graphContainer.innerHTML = '';
+            
+            // Calcular posiciones de los nodos
+            const nodes = Object.keys(graph);
+            const radius = Math.min(graphContainer.offsetWidth, graphContainer.offsetHeight) / 2 - 60;
+            const centerX = graphContainer.offsetWidth / 2;
+            const centerY = graphContainer.offsetHeight / 2;
+            
+            // Crear nodos
+            nodes.forEach((node, index) => {
+                const angle = (index / nodes.length) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                createNode(node, x, y);
+            });
+            
+            // Crear aristas
+            for (const source in graph) {
+                graph[source].forEach(edge => {
+                    createEdge(source, edge.target, edge.weight);
+                });
+            }
+        }
+        
+        document.getElementById('addNodeBtn').addEventListener('click', () => {
+            const nodeId = document.getElementById('sourceNode').value.trim();
+            
+            if (nodeId) {
+                if (!graph[nodeId]) {
+                    graph[nodeId] = [];
+                    updateGraphVisualization();
+                    updateGraphCode();
+                } else {
+                    alert('El nodo ya existe');
+                }
+            } else {
+                alert('Por favor ingresa un identificador para el nodo');
+            }
+        });
+        
+        document.getElementById('addEdgeBtn').addEventListener('click', () => {
+            const source = document.getElementById('sourceNode').value.trim();
+            const target = document.getElementById('targetNode').value.trim();
+            const weightInput = document.getElementById('edgeWeight').value.trim();
+            const weight = weightInput ? parseInt(weightInput) : null;
+            
+            if (source && target) {
+                // Crear nodos si no existen
+                if (!graph[source]) {
+                    graph[source] = [];
+                }
+                if (!graph[target]) {
+                    graph[target] = [];
+                }
+                
+                // Verificar si la arista ya existe
+                const edgeExists = graph[source].some(edge => edge.target === target);
+                
+                if (!edgeExists) {
+                    graph[source].push({ target, weight });
+                    updateGraphVisualization();
+                    updateGraphCode();
+                } else {
+                    alert('La arista ya existe');
+                }
+            } else {
+                alert('Por favor ingresa nodos origen y destino');
+            }
+        });
+        
+        document.getElementById('clearGraphBtn').addEventListener('click', () => {
+            Object.keys(graph).forEach(key => delete graph[key]);
+            updateGraphVisualization();
+            updateGraphCode();
+        });
+        
+        // Añadir un grafo de ejemplo inicial
+        function addExampleGraph() {
+            graph['A'] = [
+                { target: 'B', weight: 5 },
+                { target: 'C', weight: 3 }
+            ];
+            graph['B'] = [
+                { target: 'C', weight: 1 },
+                { target: 'D', weight: 6 }
+            ];
+            graph['C'] = [
+                { target: 'D', weight: 2 }
+            ];
+            graph['D'] = [];
+            
+            updateGraphVisualization();
+            updateGraphCode();
+        }
+        
+        // Inicializar el grafo con un ejemplo
+        addExampleGraph();
+        
+        // Hacer que los nodos sean arrastrables
+        graphContainer.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('node')) {
+                const node = e.target;
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startLeft = parseInt(node.style.left);
+                const startTop = parseInt(node.style.top);
+                
+                function onMouseMove(e) {
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    node.style.left = `${startLeft + dx}px`;
+                    node.style.top = `${startTop + dy}px`;
+                    
+                    // Actualizar las aristas conectadas a este nodo
+                    const nodeId = node.dataset.id;
+                    
+                    // Actualizar aristas salientes
+                    document.querySelectorAll(`.edge[data-source="${nodeId}"]`).forEach(edge => {
+                        const target = document.querySelector(`.node[data-id="${edge.dataset.target}"]`);
+                        if (target) {
+                            const containerRect = graphContainer.getBoundingClientRect();
+                            const sourceX = node.getBoundingClientRect().left + node.offsetWidth/2 - containerRect.left;
+                            const sourceY = node.getBoundingClientRect().top + node.offsetHeight/2 - containerRect.top;
+                            const targetX = target.getBoundingClientRect().left + target.offsetWidth/2 - containerRect.left;
+                            const targetY = target.getBoundingClientRect().top + target.offsetHeight/2 - containerRect.top;
+                            
+                            const dx = targetX - sourceX;
+                            const dy = targetY - sourceY;
+                            const length = Math.sqrt(dx * dx + dy * dy);
+                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                            
+                            edge.style.width = `${length}px`;
+                            edge.style.left = `${sourceX}px`;
+                            edge.style.top = `${sourceY}px`;
+                            edge.style.transform = `rotate(${angle}deg)`;
+                        }
+                    });
+                    
+                    // Actualizar aristas entrantes
+                    document.querySelectorAll(`.edge[data-target="${nodeId}"]`).forEach(edge => {
+                        const source = document.querySelector(`.node[data-id="${edge.dataset.source}"]`);
+                        if (source) {
+                            const containerRect = graphContainer.getBoundingClientRect();
+                            const sourceX = source.getBoundingClientRect().left + source.offsetWidth/2 - containerRect.left;
+                            const sourceY = source.getBoundingClientRect().top + source.offsetHeight/2 - containerRect.top;
+                            const targetX = node.getBoundingClientRect().left + node.offsetWidth/2 - containerRect.left;
+                            const targetY = node.getBoundingClientRect().top + node.offsetHeight/2 - containerRect.top;
+                            
+                            const dx = targetX - sourceX;
+                            const dy = targetY - sourceY;
+                            const length = Math.sqrt(dx * dx + dy * dy);
+                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                            
+                            edge.style.width = `${length}px`;
+                            edge.style.left = `${sourceX}px`;
+                            edge.style.top = `${sourceY}px`;
+                            edge.style.transform = `rotate(${angle}deg)`;
+                        }
+                    });
+                }
+                
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }
+        });
+        
+        // Ayuda contextual al pasar el ratón sobre elementos
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('mouseover', () => {
+                tab.style.backgroundColor = '#e3f2fd';
+            });
+            tab.addEventListener('mouseout', () => {
+                if (!tab.classList.contains('active')) {
+                    tab.style.backgroundColor = '#f1f1f1';
+                } else {
+                    tab.style.backgroundColor = '#fff';
+                }
+            });
+        });
+        
+        // Iniciar con valores de ejemplo en el diccionario para demostración
+        function addExampleDictionary() {
+            dictionary['Ana'] = 'Médica';
+            dictionary['Juan'] = 'Ingeniero';
+            dictionary['María'] = 'Abogada';
+            updateDictionaryDisplay();
+            updateHashTable();
+        }
+        
+        // Añadir ejemplo inicial
+        addExampleDictionary();
+    </script>
+</body>
+</html>

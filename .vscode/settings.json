@@ -6,6 +6,9 @@
         "ostream": "cpp",
         "array": "cpp",
         "string_view": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "chrono": "cpp",
+        "ranges": "cpp",
+        "variant": "cpp"
     }
 }
