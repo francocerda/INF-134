@@ -106,10 +106,11 @@ int main() {
 
 
 
-    
+    ll_insertAtBeginning(4);
     ll_insertAtBeginning(2);
+    cout << head << endl;
+    cout << head->data << endl;
     cout << head->next << endl;
-    
 
     /*
     cout << "Ejemplo de lista basada en arreglos:" << endl;
