@@ -191,18 +191,10 @@ private:
 };
 
 
-// --- Función Principal (main) para Demostración ---
 int main() {
     // Crear un grafo con 6 nodos (0 a 5)
     Grafo miGrafo(6);
 
-    // Añadir aristas para formar una estructura de ejemplo
-    //     0 --- 1
-    //     | \ / |
-    //     |  2  | --- 3
-    //     | / \ |
-    //     5 --- 4
-    //
     cout << "\n--- Agregando Aristas ---" << endl;
     miGrafo.agregarArista(0, 1);
     miGrafo.agregarArista(0, 2);
