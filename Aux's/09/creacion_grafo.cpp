@@ -41,18 +41,14 @@ public:
     void DFS(int s) {
         vector<bool> visitado(V, false);
         stack<int> pila;
-
         pila.push(s);
-
         while (!pila.empty()) {
             s = pila.top();
             pila.pop();
-
             if (!visitado[s]) {
                 cout << s << " ";
                 visitado[s] = true;
             }
-
             for (int adyacente : adj[s]) {
                 if (!visitado[adyacente]) {
                     pila.push(adyacente);
