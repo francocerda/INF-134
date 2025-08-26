@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Visual de Punteros en C++</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #252526;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        h1, h2, h3 {
+            color: #569cd6;
+            border-bottom: 2px solid #569cd6;
+            padding-bottom: 5px;
+        }
+        code {
+            font-family: "Fira Code", "Consolas", "Monaco", monospace;
+            background-color: #1e1e1e;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #ce9178;
+        }
+        pre {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+        pre code {
+            padding: 0;
+            background: none;
+            color: #9cdcfe;
+        }
+        .comment {
+            color: #6a9955;
+        }
+        .keyword {
+            color: #c586c0;
+        }
+        .operator {
+            color: #d4d4d4;
+        }
+        .literal {
+            color: #b5cea8;
+        }
+        .variable {
+            color: #4fc1ff;
+        }
+        .memory-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .memory-table th, .memory-table td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: center;
+        }
+        .memory-table th {
+            background-color: #333;
+            color: #d4d4d4;
+        }
+        .address {
+            color: #6a9955;
+            font-style: italic;
+        }
+        .value {
+            font-weight: bold;
+            color: #9cdcfe;
+        }
+        .arrow {
+            font-size: 24px;
+            color: #c586c0;
+        }
+        .highlight {
+            background-color: #44475a;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Guía Visual de Punteros en C++</h1>
+        <p>Los punteros son una de las características más potentes y a la vez más confusas de C++. Esta guía busca desmitificarlos usando explicaciones y diagramas visuales.</p>
+
+        <h2>¿Qué es una Variable? ¿Qué es la Memoria?</h2>
+        <p>Imagina la memoria de tu computadora como una serie de casilleros. Cada casillero tiene una <strong>dirección</strong> única y puede guardar un <strong>valor</strong>.</p>
+        <p>Cuando declaras una variable, por ejemplo <code>int numero = 42;</code>, el sistema operativo hace lo siguiente:</p>
+        <ol>
+            <li>Busca un casillero libre en la memoria.</li>
+            <li>Le asigna el nombre <code>numero</code> a ese casillero.</li>
+            <li>Guarda el valor <code>42</code> dentro.</li>
+        </ol>
+
+        <div class="memory-table">
+            <table>
+                <tr>
+                    <th>Variable</th>
+                    <th>Dirección de Memoria</th>
+                    <th>Valor Almacenado</th>
+                </tr>
+                <tr>
+                    <td><code>numero</code></td>
+                    <td class="address">0x7ffeef123458</td>
+                    <td class="value">42</td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>¿Qué es un Puntero?</h2>
+        <p>Un puntero no es más que una variable especial cuyo valor es la <strong>dirección de memoria</strong> de otra variable.</p>
+        <p>En lugar de guardar un <code>int</code>, un <code>char</code>, o un <code>float</code>, guarda una dirección (como <code>0x7ffeef123458</code>).</p>
+        
+        <h3>1. Declaración de un Puntero</h3>
+        <p>Se declaran usando un asterisco (<code>*</code>). El tipo del puntero debe coincidir con el tipo de la variable a la que apuntará.</p>
+        <pre><code><span class="keyword">int</span>* ptrNumero; <span class="comment">// Declara un puntero que puede apuntar a una variable de tipo int.</span></code></pre>
+        <p>En este momento, <code>ptrNumero</code> no apunta a ningún sitio. Es un puntero "salvaje" o "colgante". Apunta a una dirección de memoria basura.</p>
+
+        <h3>2. El Operador "Dirección de" (<code>&</code>)</h3>
+        <p>Para hacer que un puntero apunte a una variable, necesitamos obtener la dirección de memoria de esa variable. Usamos el operador ampersand (<code>&</code>).</p>
+        <pre><code><span class="variable">ptrNumero</span> <span class="operator">=</span> <span class="operator">&</span><span class="variable">numero</span>; <span class="comment">// Asigna la dirección de 'numero' a 'ptrNumero'.</span></code></pre>
+        <p>Ahora la situación de nuestra memoria es la siguiente:</p>
+        
+        <div class="memory-table">
+            <table>
+                <tr>
+                    <th>Variable</th>
+                    <th>Dirección de Memoria</th>
+                    <th>Valor Almacenado</th>
+                </tr>
+                <tr>
+                    <td><code>numero</code></td>
+                    <td class="address">0x7ffeef123458</td>
+                    <td class="value">42</td>
+                </tr>
+                <tr>
+                    <td><code>ptrNumero</code></td>
+                    <td class="address">0x7ffeef123460</td>
+                    <td class="value address">0x7ffeef123458</td>
+                </tr>
+            </table>
+        </div>
+        <p style="text-align:center;"><code>ptrNumero</code> "apunta a" <code>numero</code> <span class="arrow">→</span></p>
+
+        <h3>3. El Operador de Desreferencia (<code>*</code>)</h3>
+        <p>Aquí es donde ocurre la magia. Una vez que un puntero tiene una dirección válida, podemos usar el operador asterisco (<code>*</code>) de nuevo, pero esta vez para <strong>acceder al valor</strong> que está guardado en la dirección a la que apunta.</p>
+        <p>Esto se llama <strong>desreferenciar</strong> el puntero.</p>
+        <pre><code>cout <span class="operator"><<</span> <span class="operator">*</span><span class="variable">ptrNumero</span>; <span class="comment">// Imprime el valor en la dirección a la que apunta ptrNumero.</span>
+<span class="comment">// Salida: 42</span></code></pre>
+        <p>¡Incluso podemos modificar el valor original a través del puntero!</p>
+        <pre><code><span class="operator">*</span><span class="variable">ptrNumero</span> <span class="operator">=</span> <span class="literal">99</span>; <span class="comment">// Cambia el valor en la dirección 0x7ffeef123458 a 99.</span>
+cout <span class="operator"><<</span> <span class="variable">numero</span>; <span class="comment">// Ahora 'numero' vale 99.</span>
+<span class="comment">// Salida: 99</span></code></pre>
+
+        <h2>Ejemplo Completo</h2>
+        <div class="highlight">
+            <p><strong>Resumen de Operadores:</strong></p>
+            <ul>
+                <li><code>int* ptr;</code>: El <code>*</code> en la <strong>declaración</strong> crea un puntero.</li>
+                <li><code>&variable</code>: El <code>&</code> obtiene la <strong>dirección</strong> de una variable.</li>
+                <li><code>*ptr</code>: El <code>*</code> en una <strong>expresión</strong> accede al <strong>valor</strong> al que se apunta (desreferencia).</li>
+            </ul>
+        </div>
+        <pre><code><span class="keyword">#include</span> <span class="literal">&lt;iostream&gt;</span>
+
+<span class="keyword">int</span> <span class="function">main</span>() {
+    <span class="keyword">int</span> <span class="variable">numero</span> <span class="operator">=</span> <span class="literal">42</span>;
+    <span class="keyword">int</span>* <span class="variable">ptrNumero</span>;
+
+    <span class="variable">ptrNumero</span> <span class="operator">=</span> <span class="operator">&</span><span class="variable">numero</span>;
+
+    std::cout <span class="operator"><<</span> <span class="string">"Valor de la variable 'numero': "</span> <span class="operator"><<</span> <span class="variable">numero</span> <span class="operator"><<</span> std::endl;
+    std::cout <span class="operator"><<</span> <span class="string">"Dirección de memoria de 'numero': "</span> <span class="operator"><<</span> <span class="operator">&</span><span class="variable">numero</span> <span class="operator"><<</span> std::endl;
+    
+    std::cout <span class="operator"><<</span> <span class="string">"Valor del puntero 'ptrNumero' (es una dirección): "</span> <span class="operator"><<</span> <span class="variable">ptrNumero</span> <span class="operator"><<</span> std::endl;
+    std::cout <span class="operator"><<</span> <span class="string">"Valor al que apunta 'ptrNumero' (*ptrNumero): "</span> <span class="operator"><<</span> <span class="operator">*</span><span class="variable">ptrNumero</span> <span class="operator"><<</span> std::endl;
+
+    <span class="comment">// Modificando la variable original a través del puntero</span>
+    std::cout <span class="operator"><<</span> <span class="string">"\nCambiando el valor a 99 a través del puntero...\n"</span> <span class="operator"><<</span> std::endl;
+    <span class="operator">*</span><span class="variable">ptrNumero</span> <span class="operator">=</span> <span class="literal">99</span>;
+
+    std::cout <span class="operator"><<</span> <span class="string">"Nuevo valor de la variable 'numero': "</span> <span class="operator"><<</span> <span class="variable">numero</span> <span class="operator"><<</span> std::endl;
+    std::cout <span class="operator"><<</span> <span class="string">"Nuevo valor al que apunta 'ptrNumero': "</span> <span class="operator"><<</span> <span class="operator">*</span><span class="variable">ptrNumero</span> <span class="operator"><<</span> std::endl;
+
+    <span class="keyword">return</span> <span class="literal">0</span>;
+}</code></pre>
+
+        <h2>Puntero Nulo (<code>nullptr</code>)</h2>
+        <p>Es una buena práctica inicializar un puntero que no apunta a nada con <code>nullptr</code>. Esto indica explícitamente que el puntero está "vacío" y evita errores al intentar desreferenciar un puntero con una dirección basura.</p>
+        <pre><code><span class="keyword">int</span>* <span class="variable">ptrSeguro</span> <span class="operator">=</span> <span class="keyword">nullptr</span>;</code></pre>
+
+        <h2>Peligros Comunes</h2>
+        <ul>
+            <li><strong>Punteros Colgantes (Dangling Pointers):</strong> Un puntero que apunta a una dirección de memoria que ya ha sido liberada. Intentar acceder a él puede crashear el programa.</li>
+            <li><strong>Fugas de Memoria (Memory Leaks):</strong> Ocurre cuando reservas memoria dinámicamente (con <code>new</code>) y olvidas liberarla (con <code>delete</code>). El programa consume memoria que nunca devuelve.</li>
+            <li><strong>Desreferenciar un Puntero Nulo:</strong> Intentar acceder al valor de un <code>nullptr</code> (ej. <code>*ptrSeguro</code>) causará un error en tiempo de ejecución.</li>
+        </ul>
+    </div>
+</body>
+</html>
